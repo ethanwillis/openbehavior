@@ -11,41 +11,41 @@ import time
 from operator import xor 
 # UART
 ID = ""
-Zeichen = 0
-Checksumme = 0
-Tag = 0
+Ze = 0
+Checksum = 0
+Day = 0
 # Flags
 Startflag = "\x02"
 Endflag = "\x03"
-# UART oeffnen
+# UART open
 UART = serial.Serial("/dev/ttyAMA0", 9600) 
 UART.close();
 UART.open()
 while True:
     # Variablen loeschen
-	Checksumme = 0
-	Checksumme_Tag = 0
+	Checksum = 0
+	Checksum_Day = 0
 	ID = ""
-	# Zeichen einlesen
-	Zeichen = UART.read()
-	# Uebertragungsstart signalisiert worden?
-	if Zeichen == Startflag:
-	    # ID zusammen setzen
+	# signal read
+	signal = UART.read()
+	# Is transfer start signaled??
+	if signal == Startflag:
+	    # put IDs togethern
 		for Counter in range(13):
-			Zeichen = UART.read()
-			ID = ID + str(Zeichen)
-		# Endflag aus dem String loeschen
-		ID = ID.replace(Endflag, "" ) # Checksumme berechnen
+			signal = UART.read()
+			ID = ID + str(signal)
+		# Remove endflag from string.
+		ID = ID.replace(Endflag, "" ) # Checksum calculation
 		for I in range(0, 9, 2):
-			Checksumme = Checksumme ^ (((int(ID[I], 16)) << 4) + int(ID[I+1], 16))
-		Checksumme = hex(Checksumme)
-		# Tag herausfiltern
-		Tag = ((int(ID[1], 16)) << 8) + ((int(ID[2], 16)) << 4) + ((int(ID[3], 16)) << 0) 
-                Tag = hex(Tag)
-		# Ausgabe der Daten
+			Checksum = Checksum ^ (((int(ID[I], 16)) << 4) + int(ID[I+1], 16))
+		Checksum = hex(Checksum)
+		# Filter out day
+		Day = ((int(ID[1], 16)) << 8) + ((int(ID[2], 16)) << 4) + ((int(ID[3], 16)) << 0) 
+                Day = hex(Tag)
+		# Output data
 		print "------------------------------------------"
-		print "Datensatz: ", ID
-		print "Tag: ", Tag
+		print "Record: ", ID
+		print "Day: ", Day
 		print "ID: ", ID[4:10], " - ", int(ID[4:10], 16)
-		print "Checksumme: ", Checksumme
+		print "Checksum: ", Checksum
 		print "------------------------------------------"
